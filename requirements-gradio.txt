@@ -1,0 +1,4 @@
+# Extra dependencies for the optional URL-based Gradio app (app_gradio.py).
+# Install on top of requirements.txt:  pip install -r requirements-gradio.txt
+gradio>=4.0
+yt-dlp>=2024.1
