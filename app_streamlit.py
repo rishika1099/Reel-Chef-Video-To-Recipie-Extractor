@@ -1,5 +1,6 @@
 import os
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -24,6 +25,14 @@ def _has_key() -> bool:
         return False
 
 
+def download_video(url: str) -> str:
+    """Download a video from a URL with yt-dlp into a temp file."""
+    tmp_dir = tempfile.mkdtemp()
+    out_path = os.path.join(tmp_dir, "video.mp4")
+    subprocess.run(["yt-dlp", "-f", "mp4/best", "-o", out_path, url], check=True)
+    return out_path
+
+
 with st.sidebar:
     st.header("Settings")
     fps = st.slider("Frame sampling rate (fps)", 1, 2, 1)
@@ -37,15 +46,26 @@ if not _has_key():
         "local `.env` file, or Streamlit secrets to generate recipes."
     )
 
-uploaded = st.file_uploader("Upload a cooking video", type=["mp4", "mov", "m4v"])
+tab_upload, tab_url = st.tabs(["Upload a file", "Paste a link"])
+with tab_upload:
+    uploaded = st.file_uploader("Upload a cooking video", type=["mp4", "mov", "m4v"])
+    if uploaded:
+        st.video(uploaded)
+with tab_url:
+    video_url = st.text_input(
+        "Video URL",
+        placeholder="https://www.youtube.com/watch?v=...",
+    )
+    st.caption(
+        "Works for most public video URLs. Some sites (e.g. YouTube, Instagram) "
+        "may block downloads from cloud servers; if a link fails, upload the file instead."
+    )
+
 run = st.button("Cook the recipe", type="primary")
 
-if uploaded:
-    st.video(uploaded)
-
 if run:
-    if not uploaded:
-        st.error("Please upload a video first.")
+    if not uploaded and not video_url:
+        st.error("Upload a video or paste a link first.")
         st.stop()
 
     shutil.rmtree("frames", ignore_errors=True)
@@ -53,9 +73,21 @@ if run:
     Path("frames").mkdir(exist_ok=True)
     Path("outputs").mkdir(exist_ok=True)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
-        tmp.write(uploaded.getbuffer())
-        video_path = tmp.name
+    if uploaded:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+            tmp.write(uploaded.getbuffer())
+            video_path = tmp.name
+    else:
+        try:
+            with st.spinner("Downloading video from URL..."):
+                video_path = download_video(video_url)
+        except Exception as e:
+            st.error(
+                "Could not download that link. The site may block server-side "
+                "downloads; try uploading the file instead."
+            )
+            st.exception(e)
+            st.stop()
 
     try:
         st.subheader("1) Extracting frames")

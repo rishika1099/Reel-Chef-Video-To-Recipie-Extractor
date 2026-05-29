@@ -4,3 +4,4 @@ python-dotenv>=1.0
 torch>=2.2
 transformers>=4.40
 pillow>=10.0
+yt-dlp>=2024.1.0

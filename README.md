@@ -61,7 +61,7 @@ model saw at every step.
 ## Demo flow
 
 1. Open the app.
-2. Upload a short cooking video.
+2. Either **upload a short cooking video** or **paste a video link** (the two tabs at the top). Some sites such as YouTube and Instagram may block downloads from cloud servers; if a link fails, upload the file instead.
 3. (Optional) Adjust sampling rate, max frames, similarity threshold, and model in the sidebar.
 4. Click **Cook the recipe**.
 5. Watch the four stages run, read the generated recipe, and download any artifact.
