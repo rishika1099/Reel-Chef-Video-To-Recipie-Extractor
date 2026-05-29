@@ -26,11 +26,27 @@ def _has_key() -> bool:
 
 
 def download_video(url: str) -> str:
-    """Download a video from a URL with yt-dlp into a temp file."""
+    """Download a video from a URL with yt-dlp into a temp file.
+
+    Tries a few extractor strategies because YouTube/Instagram often block the
+    default player client when the request comes from a datacenter IP. On
+    failure, the captured stderr is surfaced so the cause is visible.
+    """
     tmp_dir = tempfile.mkdtemp()
     out_path = os.path.join(tmp_dir, "video.mp4")
-    subprocess.run(["yt-dlp", "-f", "mp4/best", "-o", out_path, url], check=True)
-    return out_path
+    base = ["yt-dlp", "-f", "mp4/best", "--no-playlist", "-o", out_path]
+    attempts = [
+        base + ["--extractor-args", "youtube:player_client=android", url],
+        base + ["--extractor-args", "youtube:player_client=web_safari", url],
+        base + [url],
+    ]
+    last_err = ""
+    for cmd in attempts:
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode == 0 and os.path.exists(out_path):
+            return out_path
+        last_err = (proc.stderr or proc.stdout or "").strip()
+    raise RuntimeError(last_err[-1500:] or "yt-dlp failed with no output.")
 
 
 with st.sidebar:
