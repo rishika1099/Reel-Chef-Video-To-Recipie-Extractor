@@ -2,10 +2,7 @@
 
 **Turn any cooking video into a structured recipe.**
 
-ReelChef watches a cooking video frame by frame, describes what is happening,
-groups those descriptions into step-like segments, and asks an LLM to write a
-clean recipe: title, ingredients, numbered steps with timestamps, key moments,
-and a short summary. Upload a clip, get a recipe you can actually follow.
+ReelChef is a language-agnostic multimodal system that converts cooking videos into complete, easy-to-follow recipes. By combining computer vision, timeline segmentation, and large language models, it transforms raw culinary content into ingredients, step-by-step instructions, timestamps, key moments, and concise summaries. Upload a clip and get a recipe you can actually cook from.
 
 ---
 
